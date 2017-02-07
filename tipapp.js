@@ -119,10 +119,6 @@ app.route('/api/tips')
       });
 
     }else{
-      console.log(q.body);
-      console.log(q.body.tipText);
-      console.log(q.body.category);
-      console.log(q.body.category !== 'placeholder');
       s.status(400).send('something went wrong with request body')
     }
 
@@ -132,4 +128,55 @@ app.route('/api/tips/:id')
     let lookup = q.params.id;
     lookup = parseFloat(lookup) - 1;
     s.status(200).json(tipList.tips[lookup]);
+  })
+  .patch(function(q,s){
+    const val = q.body.value
+
+    if(q.body && q.params.id && (q.body.value <=1 || q.body.value >= -1)){
+      var tipCat;
+
+      MongoClient.connect(url, function(err, db) {
+        if(err){
+          console.log(`error connecting: ${err}`)
+        }else{
+          console.log(`connected to ${url}`)
+        }
+          let coll = db.collection('tips');
+          let objId = new ObjectID(q.params.id);
+          coll.update(
+            {_id:objId},
+            {$inc:{score:val}}
+          );
+
+          coll.findOne({"_id": objId}, function(err, doc){
+            if(err){
+              console.error('error:', err);
+              s.status(400).send(err);
+            }else{
+              if(doc._id.toString()===objId.toString()){
+                s.status(200).json(doc);
+              }else{
+                s.status(400).send('Sorry, something went wrong');
+              }
+            }
+          });
+
+
+      });
+
+    }else{
+      console.log(q.body);
+      console.log(q.body.tipText);
+      console.log(q.body.category);
+      console.log(q.body.category !== 'placeholder');
+      s.status(400).send('something went wrong with request body')
+    }
+//     db.collection('tips').findOne({"_id":q.params.id}function(err, docs){
+//       console.log(err);
+// console.log('in find', docs);
+//       // let tipList = {};
+//       // tipList['tips'] = docs;
+//       // s.status(200).json(tipList);
+//     })
+//    console.log('put tip s', s);
   });

@@ -7,6 +7,14 @@ import {TipNew} from './tipNew.jsx';
 
 
 class TipCard extends React.Component{
+  constructor(props){
+    super(props);
+    // this.state = {
+    //   score : this.props.data.score,
+    //   disabled: false
+    // };
+    this.sendSubmit =this.sendSubmit.bind(this);
+  }
   render(){
     return(
       <article>
@@ -20,9 +28,18 @@ class TipCard extends React.Component{
           <time>{this.props.data.date}</time>
           <p>{this.props.data.author}</p>
         </div>
-        <TipVote score={this.props.data.score}/>
+        <TipVote score={this.props.data.score} disabled={this.props.data.disabled} id={this.props.data.id} submitChange={this.sendSubmit}/>
       </article>
     )
+  }
+  sendSubmit(value){
+    this.props.sendSubmit(this.props.data._id, value)
+    // let score = this.state.score;
+    // score += value;
+    // this.setState({
+    //   score:score,
+    //   disabled:true
+    // });
   }
 };
 
@@ -31,6 +48,7 @@ class TipList extends React.Component{
     super(props);
     this.state = {tips: []};
     this.submitTip =this.submitTip.bind(this);
+    this.changeScore =this.changeScore.bind(this);
   }
   componentDidMount(){
     fetch('/api/tips').then(response => {
@@ -47,9 +65,9 @@ class TipList extends React.Component{
 //    this.setState({tips: [1,2,3]});
   }
   render(){
-    this.state.tips.reverse();
-    let tipCards = this.state.tips.map(function(tip, index){
-      return <TipCard  key={index} data={tip}/>
+//    this.state.tips.reverse();
+    let tipCards = this.state.tips.map((tip, index) => {
+      return <TipCard  key={index} data={tip} sendSubmit={this.changeScore} />
     });
     return (
       <div>
@@ -82,6 +100,61 @@ class TipList extends React.Component{
     }).catch(err => {
       console.error(err);
     })
+  }
+  changeScore(id, value){
+    //filter by tip id, then change state on that tip
+    var id = id;
+    var theIndex;
+//    alert('patch to server');
+
+    fetch(`/api/tips/${id}`, {
+      method:"PATCH",
+      body: `{"value":${value}}`,
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      let errorText;
+      if(response.ok){
+        return response.json()
+      }else{
+        errorText = response.statusText || response;
+        console.error(`Error: ${errorText}`);
+        return Promise.reject(errorText);
+      }
+    }).then(res =>{
+      let updatedTips = this.state.tips;
+      let iterator = 0;
+      //TODO: set disabled in DB!
+      res['disabled'] = true;
+//      alert('dont map, filterBy Id then update it');
+      for (let tip of updatedTips){
+        if(tip._id == res._id){
+          updatedTips[iterator] = res
+          break;
+        }
+        iterator ++;
+      }
+      this.setState({tips:updatedTips})
+    }).catch(err => {
+      console.error(err);
+    })
+
+    function matchId(item, index){
+      if(item._id === id){
+        theIndex = index;
+        return true;
+      };
+    }
+    try{
+      let tip = this.state.tips.filter(matchId)[0];
+      let state = Object.assign({}, this.state);
+      state.tips[theIndex] = tip;
+      this.setState(state);
+    }catch(e){
+      console.error(e);
+    }
   }
 };
 
