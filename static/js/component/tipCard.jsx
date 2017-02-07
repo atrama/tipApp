@@ -9,10 +9,6 @@ import {TipNew} from './tipNew.jsx';
 class TipCard extends React.Component{
   constructor(props){
     super(props);
-    // this.state = {
-    //   score : this.props.data.score,
-    //   disabled: false
-    // };
     this.sendSubmit =this.sendSubmit.bind(this);
   }
   render(){
@@ -33,13 +29,7 @@ class TipCard extends React.Component{
     )
   }
   sendSubmit(value){
-    this.props.sendSubmit(this.props.data._id, value)
-    // let score = this.state.score;
-    // score += value;
-    // this.setState({
-    //   score:score,
-    //   disabled:true
-    // });
+    this.props.sendSubmit(this.props.data._id, value);
   }
 };
 
@@ -62,10 +52,8 @@ class TipList extends React.Component{
     }).catch(err => {
       console.error('error', err);
     });
-//    this.setState({tips: [1,2,3]});
   }
   render(){
-//    this.state.tips.reverse();
     let tipCards = this.state.tips.map((tip, index) => {
       return <TipCard  key={index} data={tip} sendSubmit={this.changeScore} />
     });
@@ -80,7 +68,6 @@ class TipList extends React.Component{
   submitTip(tip){
     fetch('/api/tips', {
       method:"POST",
-      // body: '{"foo":"bar"}'
       body: JSON.stringify(tip),
       headers:{
         'Accept':'application/json',
@@ -105,7 +92,6 @@ class TipList extends React.Component{
     //filter by tip id, then change state on that tip
     var id = id;
     var theIndex;
-//    alert('patch to server');
 
     fetch(`/api/tips/${id}`, {
       method:"PATCH",

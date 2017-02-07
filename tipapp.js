@@ -12,7 +12,6 @@ app.use(bodyParser.json());
 
 var db;
 
-
 app.use(express.static('static'));
 
 let url = 'mongodb://localhost:27017/tipapp';
@@ -49,7 +48,6 @@ MongoClient.connect(url, function(err, db) {
   }
 
 });
-
 
 app.route('/api/category')
   .get(function(q,s){
@@ -161,22 +159,10 @@ app.route('/api/tips/:id')
             }
           });
 
-
       });
 
     }else{
-      console.log(q.body);
-      console.log(q.body.tipText);
-      console.log(q.body.category);
-      console.log(q.body.category !== 'placeholder');
       s.status(400).send('something went wrong with request body')
     }
-//     db.collection('tips').findOne({"_id":q.params.id}function(err, docs){
-//       console.log(err);
-// console.log('in find', docs);
-//       // let tipList = {};
-//       // tipList['tips'] = docs;
-//       // s.status(200).json(tipList);
-//     })
-//    console.log('put tip s', s);
+
   });
